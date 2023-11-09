@@ -3,7 +3,12 @@ using UnityEngine;
 
 public class MapBuilderExit : MapBuilder
 {
-    public MapBuilderExit(SectorMap sectorMap) : base(sectorMap){}
+    protected MapObjectManager mapObjectManager;
+
+    public MapBuilderExit(SectorMap sectorMap, MapObjectManager mapObjectManager) : base(sectorMap)
+    {
+        this.mapObjectManager = mapObjectManager;
+    }
 
     public override void PerformBuilderProcess()
     {
@@ -44,21 +49,39 @@ public class MapBuilderExit : MapBuilder
         Sector foundSector = null;
         if (tempEmptySectorList.Count > 3) foundSector = tempEmptySectorList[RandomGenerator.SeededRange(0, tempEmptySectorList.Count / 5)];
         else if (tempEmptySectorList.Count > 0) foundSector = tempEmptySectorList[0];
-        AddExitLocation(foundSector);
+        if (foundSector != null)
+        {
+            AddExitLocation(foundSector, sectorMap.GetRandomLocationWithSector(foundSector), MapObjectTypes.Exit);
+        }
     }
 
-    protected virtual void AddExitLocation(Sector exitSector)
+    protected virtual bool AddExitLocation(Sector sector, Vector3 loc, MapObjectTypes type)
     {
-        if (exitSector == null) return;
+        if (sector == null) return false;
+
+        var scale = RandomGenerator.SeededRange(mapObjectManager.GetProviderMinSize(type), mapObjectManager.GetProviderMaxSize(type));
+        var finalLoc = new Vector3(loc.x, -(mapObjectManager.GetProviderYValueOffset(type)), loc.z);
+        if (!IsValidatePlacement(sector, finalLoc, scale, type))
+            return false;
 
         var missionLoc = new EncounterLocation();
-        missionLoc.ObjectType = SectorObjectLocation.MapObjectTypes.Exit;
-        missionLoc.Location = sectorMap.GetRandomLocationWithSector(exitSector);
-        missionLoc.Difficulty = EncounterLocation.EncounterLocationDifficulty.None;
+        missionLoc.ObjectType = type;
+        missionLoc.Location = finalLoc;
+        missionLoc.Scale = scale;
+        missionLoc.Difficulty = EncounterLocationDifficulty.None;
+        missionLoc.ObjectManager = mapObjectManager;
+        missionLoc.EncounterType = EncounterLocationType.Mission;
 
-        exitSector.EncounterLocation = missionLoc;
+        sector.EncounterLocation = missionLoc;
 
-        sectorMap.SetExitSector(exitSector);
-        sectorMap.GetEncounterMissionSectors().Add(exitSector);
+        sectorMap.SetExitSector(sector);
+        sectorMap.GetEncounterMissionSectors().Add(sector);
+
+        return true;
+    }
+
+    protected virtual bool IsValidatePlacement(Sector sector, Vector3 loc, float scale, MapObjectTypes type)
+    {
+        return true;
     }
 }

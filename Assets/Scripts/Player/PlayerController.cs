@@ -17,12 +17,12 @@ public class PlayerController : MonoBehaviour
     protected float angleToLook;
 
     protected Player player;
-
-    public float BlinkDistance;
+    protected Ship ship;
 
     protected virtual void Awake()
     {
         player = GetComponentInChildren<Player>();
+        
         rb = GetComponent<Rigidbody>();
         inputActions = new PlayerInputs();
         inputActions.Player.Enable();
@@ -31,9 +31,14 @@ public class PlayerController : MonoBehaviour
         inputActions.Player.Boost.canceled += Boost_canceled;
         inputActions.Player.Interact.performed += Interact_performed;
         inputActions.Player.Pause.performed += Pause_performed;
-        GameEventSystem.Player_TriggerBlink += GameEventSystem_Player_TriggerBlink;
 
         CurrentMoveForce = BaseMoveForce;
+    }
+
+    protected virtual void Start()
+    {
+        ship = player.GetShip();
+        ship.Ship_PerformBlink += Ship_PerformBlink;
     }
 
     protected virtual void Pause_performed(UnityEngine.InputSystem.InputAction.CallbackContext obj)
@@ -58,12 +63,15 @@ public class PlayerController : MonoBehaviour
         GameEventSystem.Player_OnActivateEncounter(player);
     }
 
-    protected virtual void GameEventSystem_Player_TriggerBlink(Player data)
+    protected virtual void Ship_PerformBlink(Ship data)
     {
         if (GameStateData.IsGameOver || GameStateData.IsPaused) return;
 
         var input = inputActions.Player.Move.ReadValue<Vector2>().normalized;
-        transform.position = transform.position + new Vector3(input.x, 0, input.y) * BlinkDistance;
+        var newPos = transform.position + new Vector3(input.x, 0, input.y) * data.BlinkDistance;
+        newPos.x = Mathf.Clamp(newPos.x, 0, MapLoader.MapBoundsX());
+        newPos.z = Mathf.Clamp(newPos.z, 0, MapLoader.MapBoundsZ());
+        transform.position = newPos;
     }
 
     protected virtual void Blink_performed(UnityEngine.InputSystem.InputAction.CallbackContext obj)
@@ -93,7 +101,7 @@ public class PlayerController : MonoBehaviour
         {
             var input = inputActions.Player.Move.ReadValue<Vector2>().normalized;
             rb.AddForce(new Vector3(input.x, 0, input.y) * CurrentMoveForce, ForceMode.Acceleration);
-            player.MovementVelocity = rb.velocity;
+            ship.MovementVelocity = rb.velocity;
         }
     }
 

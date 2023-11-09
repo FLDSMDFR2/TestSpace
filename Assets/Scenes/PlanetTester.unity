@@ -1056,7 +1056,6 @@ GameObject:
   - component: {fileID: 2005888324}
   - component: {fileID: 2005888323}
   - component: {fileID: 2005888325}
-  - component: {fileID: 2005888326}
   m_Layer: 3
   m_Name: PlanetSpawner
   m_TagString: Untagged
@@ -1076,36 +1075,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 591691a3403b60c44b932df1424f1cad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  PlanetMaterial: {fileID: 2100000, guid: 431a7bafa4125054d81da3692554969a, type: 2}
+  PlanetMaterial: {fileID: 2100000, guid: 39a3c0f917cc6814fbe64c6047bd1b22, type: 2}
   PlanetPrefab: {fileID: 841053331257731988, guid: 8c5989964f275614a8fa14fed900a865, type: 3}
-  Colors: {fileID: 2005888326}
-  ForgroundMaxSize: 0
-  ForgroundMinSize: 0
-  ForgroundYValue: 0
-  MaxScaleWater: 15
-  MinScaleWater: 7
+  MaxScaleWater: 8
+  MinScaleWater: 6
   MaxShiftWater: 70
   MinShiftWater: 40
   MaxClippingWater: 0.3
-  MinClippingWater: 0.2
+  MinClippingWater: 0.3
   MaxBrightnessWater: 1
-  MinBrightnessWater: 0.7
-  MaxPowerWater: 2
+  MinBrightnessWater: 1
+  MaxPowerWater: 1
   MinPowerWater: 1
-  MaxGrayScaleWater: 2
-  MinGrayScaleWater: 1.5
-  MaxScaleLand: 15
-  MinScaleLand: 7
-  MaxShiftLand: 39
-  MinShiftLand: 20
-  MaxClippingLand: 0.3
-  MinClippingLand: 0.2
-  MaxBrightnessLand: 1
-  MinBrightnessLand: 0.7
-  MaxPowerLand: 2
-  MinPowerLand: 1
-  MaxGrayScaleLand: 2
-  MinGrayScaleLand: 1.5
+  MaxGrayScaleWater: 100
+  MinGrayScaleWater: 100
 --- !u!4 &2005888324
 Transform:
   m_ObjectHideFlags: 0
@@ -1138,16 +1121,3 @@ MonoBehaviour:
   MinSize: 50
   YValue: 100
   ReseatTime: 5
---- !u!114 &2005888326
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2005888321}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 944c92abb666c004abe74df867bdd05a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  colorsList: []

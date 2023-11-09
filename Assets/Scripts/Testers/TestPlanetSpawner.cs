@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class TestPlanetSpawner : MonoBehaviour
 {
-    public PlanetProvider Provider;
+    public PlanetGenerator Provider;
 
     [Header("Background")]
     public float MaxSize;
@@ -37,7 +37,7 @@ public class TestPlanetSpawner : MonoBehaviour
             {
                 for (int z = 0; z < 10; z++)
                 {
-                    CreatePlanet(transform.position + new Vector3( x * MaxSize, 0, z * MaxSize));
+                    //CreatePlanet(transform.position + new Vector3( x * MaxSize, 0, z * MaxSize));
                 }
             }
 
@@ -45,24 +45,24 @@ public class TestPlanetSpawner : MonoBehaviour
         }
     }
 
-    public virtual GameObject CreatePlanet(Vector3 loc)
-    {
-        var scale = RandomGenerator.SeededRange(MinSize, MaxSize);
-        var planet = Provider.GetNewPlanet(RandomGenerator.UnseededRandomBool());
-        planet.transform.position = new Vector3(loc.x, -(scale + YValue), loc.z);
-        planet.transform.localScale = new Vector3(scale, scale, scale);
-        planet.transform.rotation = Quaternion.Euler(0, 0, 90);
+    //public virtual GameObject CreatePlanet(Vector3 loc)
+    //{
+    //    var scale = RandomGenerator.SeededRange(MinSize, MaxSize);
+    //    var planet = Provider.GetNewObject(RandomGenerator.UnseededRandomBool());
+    //    planet.transform.position = new Vector3(loc.x, -(scale + YValue), loc.z);
+    //    planet.transform.localScale = new Vector3(scale, scale, scale);
+    //    planet.transform.rotation = Quaternion.Euler(0, 0, 90);
 
-        var palentScript = planet.GetComponent<Planet>();
-        if (palentScript != null)
-        {
-            palentScript.HasRings = RandomGenerator.SeededRandomBool();
-        }
+    //    var palentScript = planet.GetComponent<Planet>();
+    //    if (palentScript != null)
+    //    {
+    //        palentScript.HasRings = RandomGenerator.SeededRandomBool();
+    //    }
 
-        planetList.Add(planet);
-        planet.SetActive(true);
-        return planet;
-    }
+    //    planetList.Add(planet);
+    //    planet.SetActive(true);
+    //    return planet;
+    //}
 
     protected virtual void ClearPlanets()
     {

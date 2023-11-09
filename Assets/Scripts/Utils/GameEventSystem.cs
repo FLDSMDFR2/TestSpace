@@ -95,7 +95,6 @@ public class GameEventSystem
     public static event PlayerEvent Player_Paused;
     public static event PlayerEvent Player_BlinkTriggered; // blink button press
     public static event PlayerEvent Player_TriggerBlink; // blink should now be performed
-    public static event PlayerEvent Player_ResetData;
     public static event PlayerEvent Player_ActivateEncounter;
 
     public static void Player_OnKilled(Player data)
@@ -117,10 +116,6 @@ public class GameEventSystem
     public static void Player_OnTriggerBlink(Player data)
     {
         Player_TriggerBlink?.Invoke(data);
-    }
-    public static void Player_OnResetData(Player data)
-    {
-        Player_ResetData?.Invoke(data);
     }
     public static void Player_OnActivateEncounter(Player data)
     {

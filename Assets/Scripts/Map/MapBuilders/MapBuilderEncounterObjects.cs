@@ -5,9 +5,12 @@ using UnityEngine;
 public class MapBuilderEncounterObjects : MapBuilder
 {
     protected int encounterDistanceDifficulty;
-    public MapBuilderEncounterObjects(SectorMap sectorMap, int encounterDistanceDifficulty) : base(sectorMap) 
+    protected MapObjectManager mapObjectManager;
+
+    public MapBuilderEncounterObjects(SectorMap sectorMap, MapObjectManager mapObjectManager, int encounterDistanceDifficulty) : base(sectorMap) 
     {
         this.encounterDistanceDifficulty = encounterDistanceDifficulty;
+        this.mapObjectManager = mapObjectManager;
     }
 
     public override void PerformBuilderProcess()
@@ -35,32 +38,52 @@ public class MapBuilderEncounterObjects : MapBuilder
         // randomally dont place background objects
         if (RandomGenerator.SeededRandomBool()) return;
 
-        AddEncounter(sector, sectorMap.GetRandomLocationWithSector(sector));
-        encounterSecotrs.Add(sector);
+        var tryCount = 5;
+        while (tryCount > 0)
+        {
+            tryCount--;
+            if (!AddEncounter(sector, sectorMap.GetRandomLocationWithSector(sector), MapObjectTypes.Encounter)) continue;
+            encounterSecotrs.Add(sector);
+            break;
+        }
     }
 
-    protected virtual void AddEncounter(Sector sectors, Vector3 loc)
+    protected virtual bool AddEncounter(Sector sector, Vector3 loc, MapObjectTypes type)
     {
-        var missionLoc = new EncounterLocation();
-        missionLoc.ObjectType = SectorObjectLocation.MapObjectTypes.Encounter;
-        missionLoc.Location = loc;
-        missionLoc.Difficulty = GetEncounterLocationDifficulty(sectors);
+        var scale = RandomGenerator.SeededRange(mapObjectManager.GetProviderMinSize(type), mapObjectManager.GetProviderMaxSize(type));
+        var finalLoc = new Vector3(loc.x, -(mapObjectManager.GetProviderYValueOffset(type)), loc.z);
+        if (!IsValidatePlacement(sector, finalLoc, scale, type))
+            return false;
 
-        sectors.EncounterLocation = missionLoc;
+        var missionLoc = new EncounterLocation();
+        missionLoc.ObjectType = type;
+        missionLoc.Location = finalLoc;
+        missionLoc.Scale = scale;
+        missionLoc.Difficulty = GetEncounterLocationDifficulty(sector);
+        missionLoc.ObjectManager = mapObjectManager;
+        missionLoc.EncounterType = EncounterLocationType.None;
+
+        sector.EncounterLocation = missionLoc;
+        return true;
     }
 
-    protected virtual EncounterLocation.EncounterLocationDifficulty GetEncounterLocationDifficulty(Sector sectors)
+    protected virtual bool IsValidatePlacement(Sector sector, Vector3 loc, float scale, MapObjectTypes type)
+    {
+        return true;
+    }
+
+    protected virtual EncounterLocationDifficulty GetEncounterLocationDifficulty(Sector sectors)
     { 
-        for(var i = 1; i < Enum.GetNames(typeof(EncounterLocation.EncounterLocationDifficulty)).Length; i++)
+        for(var i = 1; i < Enum.GetNames(typeof(EncounterLocationDifficulty)).Length; i++)
         {
             var difX = Mathf.Abs(sectors.SectorPosX - sectorMap.GetPlayerSpawnSector().SectorPosX);
             var difZ = Mathf.Abs(sectors.SectorPosZ - sectorMap.GetPlayerSpawnSector().SectorPosZ);
             var dist = Mathf.Max(difX, difZ);
             if ((dist >= (i-1) * encounterDistanceDifficulty && dist < i * encounterDistanceDifficulty) &&
                 (dist >= (i-1) * encounterDistanceDifficulty && dist < i * encounterDistanceDifficulty))
-                return (EncounterLocation.EncounterLocationDifficulty)i;
+                return (EncounterLocationDifficulty)i;
         }
 
-        return EncounterLocation.EncounterLocationDifficulty.None;
+        return EncounterLocationDifficulty.None;
     }
 }

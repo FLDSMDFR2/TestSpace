@@ -18,4 +18,9 @@ public class ExitEncounter : Encounter
     {
         GameEventSystem.Game_OnStageComplete();
     }
+
+    protected virtual void OnDestroy()
+    {
+        GameEventSystem.Encounter_MissionChange -= GameEventSystem_Encounter_MissionChange;
+    }
 }

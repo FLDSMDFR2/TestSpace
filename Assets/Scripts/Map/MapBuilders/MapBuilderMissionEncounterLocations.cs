@@ -13,14 +13,14 @@ public class MapBuilderMissionEncounterLocations : MapBuilder
     {
         this.missionsToComplete = missionsToComplete;
 
-        var difficulties = Enum.GetNames(typeof(EncounterLocation.EncounterLocationDifficulty)).Length - 1;
+        var difficulties = Enum.GetNames(typeof(EncounterLocationDifficulty)).Length - 1;
         var totalPerDif = missionsToComplete / difficulties;
         var remander = missionsToComplete % difficulties;
 
-        for (int i = 0  ; i < Enum.GetNames(typeof(EncounterLocation.EncounterLocationDifficulty)).Length; i++)
+        for (int i = 0  ; i < Enum.GetNames(typeof(EncounterLocationDifficulty)).Length; i++)
         {
             difficultyMap.Add(0);
-            if ((EncounterLocation.EncounterLocationDifficulty)i == EncounterLocation.EncounterLocationDifficulty.None) continue;
+            if ((EncounterLocationDifficulty)i == EncounterLocationDifficulty.None) continue;
             difficultyMap[i] += totalPerDif;
             if (i <= remander) difficultyMap[i] += 1;
         }
@@ -32,9 +32,9 @@ public class MapBuilderMissionEncounterLocations : MapBuilder
         var lastSecor = sectorMap.GetPlayerSpawnSector();
         for (int index = 0; index < difficultyMap.Count; index++)
         {
-            if ((EncounterLocation.EncounterLocationDifficulty)index == EncounterLocation.EncounterLocationDifficulty.None) continue;
+            if ((EncounterLocationDifficulty)index == EncounterLocationDifficulty.None) continue;
 
-            GetSectorsForMissionDifficulty((EncounterLocation.EncounterLocationDifficulty)index, difficultyMap[index], lastSecor, tempList);
+            GetSectorsForMissionDifficulty((EncounterLocationDifficulty)index, difficultyMap[index], lastSecor, tempList);
             if (tempList.Count > 0) lastSecor = tempList[tempList.Count - 1];
         }
 
@@ -45,7 +45,7 @@ public class MapBuilderMissionEncounterLocations : MapBuilder
         }
     }
 
-    protected virtual void GetSectorsForMissionDifficulty(EncounterLocation.EncounterLocationDifficulty difficulty, 
+    protected virtual void GetSectorsForMissionDifficulty(EncounterLocationDifficulty difficulty, 
         int difficultiesToFind, Sector startFromSector, List<Sector> foundSectors)
     {
         var currentSectorToSearchFrom = startFromSector;
@@ -54,7 +54,7 @@ public class MapBuilderMissionEncounterLocations : MapBuilder
         {
 
             var difficultTypeList = new List<Sector>();
-            var temp = new List<int>();
+            var destArray = new List<int>();
             foreach (var sector in sectorMap.GetEncounterSectors())
             {
                 if (foundSectors.Contains(sector)) continue;
@@ -64,20 +64,18 @@ public class MapBuilderMissionEncounterLocations : MapBuilder
                 var found = false;
                 for (int i = 0; i < difficultTypeList.Count; i++)
                 {
-                    if (dist < temp[i])
+                    if (dist < destArray[i])
                     {
-                        sector.EncounterLocation.ObjectType = SectorObjectLocation.MapObjectTypes.Mission;
                         difficultTypeList.Insert(i, sector);
-                        temp.Insert(i, dist);
+                        destArray.Insert(i, dist);
                         found = true;
                         break;
                     }
                 }
                 if (!found)
                 {
-                    sector.EncounterLocation.ObjectType = SectorObjectLocation.MapObjectTypes.Mission;
                     difficultTypeList.Add(sector);
-                    temp.Add(dist);
+                    destArray.Add(dist);
                 }
             }
 
@@ -87,6 +85,7 @@ public class MapBuilderMissionEncounterLocations : MapBuilder
 
             if (foundSector != null)
             {
+                foundSector.EncounterLocation.EncounterType = EncounterLocationType.Mission;
                 foundSectors.Add(foundSector);
                 currentSectorToSearchFrom = foundSector;
             }

@@ -1,5 +1,6 @@
 using UnityEngine;
 
+[RequireComponent(typeof(MapDrawer))]
 public class MapLoader : MonoBehaviour
 {
     public int TotalSectorsX = 10;
@@ -12,6 +13,8 @@ public class MapLoader : MonoBehaviour
     public int EncounterDistanceDifficulty = 2;
     public int MissionsToComplete = 2;
 
+    public MapObjectManager MapObjectManager;
+
     protected SectorMap map;
     protected MapCullManager cullManager;
     protected MapBuilder backGroundObjects;
@@ -22,12 +25,42 @@ public class MapLoader : MonoBehaviour
 
     protected MapBuilder mapValidator;
     protected EncounterManager encounterManager;
+    protected MapDrawer mapDrawer;
+
+    protected static int mapBoundsX = 10;
+    protected static int mapBoundsZ = 10;
 
     protected virtual void Awake()
     {
-        var isValidMap = false;
-        while (!isValidMap)
+        mapBoundsX = TotalSectorsX * SectorSize;
+        mapBoundsZ = TotalSectorsZ * SectorSize;
+
+        mapDrawer = GetComponent<MapDrawer>();
+        GameEventSystem.Game_Start += GameEventSystem_Game_Start;
+    }
+
+    protected virtual void GameEventSystem_Game_Start()
+    {
+        if (BuildMap())
         {
+            GameEventSystem.Map_OnBuilt(map);
+            mapDrawer.ClearMap();   
+            mapDrawer.DrawMap(map, cullManager);
+        }
+        else
+        {
+            Debug.Log("Map Build Failed");
+        }
+    }
+
+    public virtual bool BuildMap()
+    {
+        var tryCount = 50;
+        var isValidMap = false;
+        while (!isValidMap && tryCount > 0)
+        {
+            tryCount--;
+
             //build map
             map = new SectorMap(TotalSectorsX, TotalSectorsZ, SectorSize);
 
@@ -36,11 +69,11 @@ public class MapLoader : MonoBehaviour
             playerSpawn.PerformBuilderProcess();
 
             //create background objects
-            backGroundObjects = new MapBuilderBackGroundObjects(map);
+            backGroundObjects = new MapBuilderBackGroundObjects(map, MapObjectManager);
             backGroundObjects.PerformBuilderProcess();
 
             //create encounter locations
-            encounterLocations = new MapBuilderEncounterObjects(map, EncounterDistanceDifficulty);
+            encounterLocations = new MapBuilderEncounterObjects(map, MapObjectManager, EncounterDistanceDifficulty);
             encounterLocations.PerformBuilderProcess();
 
             //create mission locations
@@ -48,7 +81,7 @@ public class MapLoader : MonoBehaviour
             missionEncounterLocations.PerformBuilderProcess();
 
             // create exit location
-            exitLocation = new MapBuilderExit(map);
+            exitLocation = new MapBuilderExit(map, MapObjectManager);
             exitLocation.PerformBuilderProcess();
 
             // validate we have a good map
@@ -59,20 +92,16 @@ public class MapLoader : MonoBehaviour
 
         encounterManager = new EncounterManager(map);
         cullManager = new MapCullManager(map, CullingDistance);
+
+        return isValidMap;
     }
 
-    protected virtual void Start()
+    public static int MapBoundsX()
     {
-        GameEventSystem.Map_OnBuilt(map);
+        return mapBoundsX;
     }
-
-    public virtual SectorMap GetMap()
+    public static int MapBoundsZ()
     {
-        return map;
-    }
-
-    public virtual MapCullManager GetMapCullManager()
-    {
-        return cullManager;
+        return mapBoundsZ;
     }
 }

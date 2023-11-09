@@ -9,6 +9,12 @@ public class UIMissionStartDisplay : MonoBehaviour
         GameEventSystem.Encounter_EnterEncounterRange += GameEventSystem_encounterToActive_EnterEncounterRange;
         GameEventSystem.Encounter_ExitEncounterRange += GameEventSystem_encounterToActive_ExitEncounterRange;
         GameEventSystem.Encounter_Complete += GameEventSystem_Encounter_Complete;
+        GameEventSystem.Game_StageComplete += GameEventSystem_Game_StageComplete;
+    }
+
+    private void GameEventSystem_Game_StageComplete()
+    {
+        Display.SetActive(false);
     }
 
     private void GameEventSystem_Encounter_Complete(Encounter sector)

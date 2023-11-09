@@ -7,7 +7,7 @@ public class Sector
     public int SectorPosX;
     public int SectorPosZ;
 
-    public List<SectorObjectLocation> BackgroundLocations = new List<SectorObjectLocation>();
+    public List<SectorObjectLocation> BackgroundObjects = new List<SectorObjectLocation>();
     public EncounterLocation EncounterLocation;
 
     public Sector(int x, int z, int size)
@@ -24,8 +24,9 @@ public class Sector
 
         var encounter = obj.GetComponent<Encounter>();
         if (encounter == null) return;
+        encounter.SetDifficulty(EncounterLocation.Difficulty);
         EncounterLocation.Encounter = encounter;
 
-        if (EncounterLocation.ObjectType == SectorObjectLocation.MapObjectTypes.Exit) EncounterLocation.Object.SetActive(false);
+        if (EncounterLocation.ObjectType == MapObjectTypes.Exit) EncounterLocation.Object.SetActive(false);
     }
 }

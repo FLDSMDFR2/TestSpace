@@ -1,39 +1,47 @@
 using System.Collections;
 using UnityEngine;
 
-[RequireComponent(typeof(MapLoader))]
 public class MapDrawer : MonoBehaviour
 {
-    protected MapLoader loader;
     protected SectorMap map;
     protected MapCullManager mapCullManager;
 
-    public BackGroundPlanetGenerator backGroundPlanetGenerator;
     public GameObject Player;
 
     public float MapUpdateRate = 5;
 
-    public GameObject TESTEventEasy;
-    public GameObject TESTEventMedium;
-    public GameObject TESTEventHard;
-    public GameObject TESTExit;
-
-    protected virtual void Awake()
+    public virtual void DrawMap(SectorMap map, MapCullManager mapCullManager)
     {
-        loader = GetComponent<MapLoader>();
-    }
+        this.map = map;
+        this.mapCullManager = mapCullManager;
 
-    protected virtual void Start()
-    {
-        map = loader.GetMap();
-        mapCullManager = loader.GetMapCullManager();
-
-        DrawMap();
+        Draw();
         SetPlay();       
         
         StartCoroutine(UpdateMap());
 
         GameEventSystem.Map_OnDrawn(map);
+    }
+
+    public virtual void ClearMap()
+    {
+        if (map == null) return;
+
+        StopCoroutine(UpdateMap());
+
+        foreach (var sectorList in map.GetSectors())
+        {
+            foreach (var sector in sectorList)
+            {
+                if (sector.EncounterLocation != null && sector.EncounterLocation.Object != null) Destroy(sector.EncounterLocation.Object);
+
+                foreach(var bgo in sector.BackgroundObjects)
+                {
+                    if (bgo.Object != null) Destroy(bgo.Object);
+                }
+                sector.BackgroundObjects.Clear();
+            }
+        }
     }
 
     protected virtual IEnumerator UpdateMap()
@@ -57,43 +65,33 @@ public class MapDrawer : MonoBehaviour
         //mapCullManager.CullMap(sector);
     }
 
-    protected virtual void DrawMap()
+    protected virtual void Draw()
     {
         foreach (var sectorList in map.GetSectors())
         {
             foreach (var sector in sectorList)
             {
-                if (sector.EncounterLocation != null)
+                if (sector.EncounterLocation != null && sector.EncounterLocation.ObjectManager != null)
                 {
-                    if (sector.EncounterLocation.ObjectType == SectorObjectLocation.MapObjectTypes.Encounter ||
-                       sector.EncounterLocation.ObjectType == SectorObjectLocation.MapObjectTypes.Mission)
-                    {
-                        if (sector.EncounterLocation.Difficulty == EncounterLocation.EncounterLocationDifficulty.Easy)
-                        {
-                            sector.SetMissionLocationObject(Instantiate(TESTEventEasy, new Vector3(sector.EncounterLocation.Location.x, -100, sector.EncounterLocation.Location.z), Quaternion.identity));
-                        }
-                        else if (sector.EncounterLocation.Difficulty == EncounterLocation.EncounterLocationDifficulty.Medium)
-                        {
-                            sector.SetMissionLocationObject(Instantiate(TESTEventMedium, new Vector3(sector.EncounterLocation.Location.x, -100, sector.EncounterLocation.Location.z), Quaternion.identity));
-                        }
-                        else if (sector.EncounterLocation.Difficulty == EncounterLocation.EncounterLocationDifficulty.Hard)
-                        {
-                            sector.SetMissionLocationObject(Instantiate(TESTEventHard, new Vector3(sector.EncounterLocation.Location.x, -100, sector.EncounterLocation.Location.z), Quaternion.identity));
-                        }
-                        else
-                        {
-                            Debug.Log("No Difficulty");
-                        }
-                    }
-                    else if (sector.EncounterLocation.ObjectType == SectorObjectLocation.MapObjectTypes.Exit)
-                    {
-                        sector.SetMissionLocationObject(Instantiate(TESTExit, new Vector3(sector.EncounterLocation.Location.x, -100, sector.EncounterLocation.Location.z), Quaternion.identity));
-                    }
+                    var obj = sector.EncounterLocation.ObjectManager.GetObject(sector.EncounterLocation.ObjectType);
+                    if (obj == null) continue;
+
+                    obj.transform.position = sector.EncounterLocation.Location;
+                    obj.transform.localScale = new Vector3(sector.EncounterLocation.Scale, sector.EncounterLocation.Scale, sector.EncounterLocation.Scale);
+                    sector.SetMissionLocationObject(obj);
                 }
 
-                foreach (var bg in sector.BackgroundLocations)
+                foreach (var bg in sector.BackgroundObjects)
                 {
-                    bg.Object = backGroundPlanetGenerator.CreatePlanet(bg.Location);
+                    if (bg.ObjectManager == null) continue;
+                    var obj = bg.ObjectManager.GetObject(bg.ObjectType);
+                    if (obj == null) continue;
+
+                    obj.transform.position = new Vector3(bg.Location.x, bg.Location.y, bg.Location.z);
+                    obj.transform.localScale = new Vector3(bg.Scale, bg.Scale, bg.Scale);
+                    obj.transform.rotation = Quaternion.Euler(0, 0, 90);
+
+                    bg.Object = obj;
                     bg.Location = bg.Object.transform.position;
                 }
             }

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class GamePlayerManager : MonoBehaviour
+public class GamePlayManager : MonoBehaviour
 {
     protected GameStateManager stateManager;
 

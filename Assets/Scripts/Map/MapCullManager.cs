@@ -60,7 +60,7 @@ public class MapCullManager
 
     protected virtual void ActivateSector(Sector sector)
     {
-        foreach (var bgl in sector.BackgroundLocations)
+        foreach (var bgl in sector.BackgroundObjects)
         {
             bgl.Object.transform.position = bgl.Location;
             bgl.Object.SetActive(true);
@@ -68,7 +68,7 @@ public class MapCullManager
         if (sector.EncounterLocation != null)
         {
             // if this is the exit location dont do anything it will activate on its own when needed
-            if (sector.EncounterLocation.ObjectType == SectorObjectLocation.MapObjectTypes.Exit) return;
+            if (sector.EncounterLocation.ObjectType == MapObjectTypes.Exit) return;
 
             sector.EncounterLocation.Object.SetActive(true);
         }
@@ -76,7 +76,7 @@ public class MapCullManager
 
     protected virtual void DeactivateSector(Sector sector)
     {
-        foreach (var bgl in sector.BackgroundLocations)
+        foreach (var bgl in sector.BackgroundObjects)
         {
             bgl.Object.SetActive(false);
         }

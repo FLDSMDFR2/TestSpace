@@ -16,6 +16,7 @@ public class CameraController : MonoBehaviour
     public float MinZoom = 40f;
 
     public Vector3 OffSet;
+    public Vector3 MouseOffSet;
 
     protected Vector3 velocity;
     protected Camera cam;
@@ -37,11 +38,7 @@ public class CameraController : MonoBehaviour
 
     protected virtual void FixedUpdate()
     {
-        if (targets == null || targets.Count <= 0)
-        {
-            AddTargets();
-            return;
-        }
+        if (GameStateData.IsGameOver || GameStateData.IsGameOver) return;
 
         Move();
         Zoom();
@@ -69,7 +66,7 @@ public class CameraController : MonoBehaviour
             retVal = retVal.normalized;
         }
 
-        return new Vector3(retVal.x * 5, 0f, retVal.y * 5);
+        return new Vector3(retVal.x * MouseOffSet.x, 0f, retVal.y * MouseOffSet.z);
     }
 
     protected virtual void Zoom() {}

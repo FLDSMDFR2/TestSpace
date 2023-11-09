@@ -2,6 +2,8 @@ using UnityEngine;
 
 public class Encounter : MonoBehaviour
 {
+    protected EncounterLocationDifficulty encounterDifficulty = EncounterLocationDifficulty.None;
+
     protected virtual void Awake()
     {
         var trigger = GetComponentInChildren<ColliderTriggers>();
@@ -14,6 +16,11 @@ public class Encounter : MonoBehaviour
     }
 
     protected virtual void InitEncounter(){ }
+
+    public virtual void SetDifficulty(EncounterLocationDifficulty difficulty) 
+    {
+        this.encounterDifficulty = difficulty;
+    }
 
     public virtual void ActivateEncounter()
     {
